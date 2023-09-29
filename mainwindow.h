@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 #include <QLabel>
+#include <QPushButton>
+#include <QStackedLayout>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,6 +20,10 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QLabel *label;
+    QString fileContent;
+
+private slots:
+    void openFile();
+    void scanWord();
 };
 #endif // MAINWINDOW_H

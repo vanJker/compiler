@@ -19,7 +19,7 @@ const QSet<QString> KEYWORD_SET = {
 
 // C++ 标点符号
 const QSet<char> PUNCTUATION_SET = {
-    '{', '}', ';', '#'
+    '{', '}', ';'
 };
 
 // 判断当前字符是否为数字字符
@@ -159,6 +159,10 @@ char *doScan(char *str)
                 c = *str++;
             } else if (isPunctuation(c)) {
                 state = 29;
+            } else if (c == '#') {
+                state = 30;
+                word += c;
+                c = *str++;
             }
             break;
         case 1:
@@ -592,6 +596,16 @@ char *doScan(char *str)
                 }
                 return str;
             }
+        case 30:
+            // state 30 - macro
+            if (c == '\n' || c == EOF) {
+                if (!word_map.contains(word)) {
+                    word_map.insert(word, "宏");
+                }
+                return str;
+            }
+            word += c;
+            c = *str++;
         default:
             break;
         }
