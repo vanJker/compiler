@@ -185,7 +185,7 @@ char *doScan(char *str)
             break;
         case 2:
             // state 2 - 数字
-            if (isDigit(c)) {
+            if (isDigit(c) || c == 'x' || c == 'X' || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-') {
                 state = 2;
                 word += c;
                 c = *str++;
@@ -587,6 +587,7 @@ char *doScan(char *str)
                 word += c;
                 c = *str++;
             }
+            break;
         case 29:
             // state 29 - 标点符号 {, }, #, ;
             if (isPunctuation(c)) {
@@ -596,6 +597,7 @@ char *doScan(char *str)
                 }
                 return str;
             }
+            break;
         case 30:
             // state 30 - macro
             if (c == '\n' || c == EOF) {
@@ -606,6 +608,7 @@ char *doScan(char *str)
             }
             word += c;
             c = *str++;
+            break;
         default:
             break;
         }
