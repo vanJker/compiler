@@ -1,4 +1,5 @@
 #include "dfa.h"
+#include <algorithm>
 
 // Just for Debug
 static int counter = 0;
@@ -18,6 +19,7 @@ void DFAState::addTrans(char c, DFAState* state) {
         }
     }
     this->trans.push_back({c, state});
+    sort(this->trans.begin(), this->trans.end());
 }
 
 // epsilon closure of DFA state
@@ -43,6 +45,10 @@ DFAState* DFAState::delta(char c) {
 // is the DFA state contains given NFA state
 bool DFAState::containsNFAState(NFAState* state) {
     return this->nfa_states.count(state);
+}
+
+bool DFAState::transEqual(DFAState* state) {
+    return this->trans == state->trans;
 }
 
 // display the DFA state
@@ -122,6 +128,139 @@ void DFA::display() {
     cout << "}" << endl;
 
     for (auto it = this->full_list.begin(); it != this->full_list.end(); it++) {
+        (*it)->display();
+        cout << endl;
+    }
+}
+
+// just for debug
+static int counter1 = 0;
+
+// construct a minial DFA state
+MinDFAState::MinDFAState(set<DFAState*> s) {
+    this->id = counter1++;
+    this->dfa_states = s;
+}
+
+// add transition to minial DFA state
+void MinDFAState::addTrans(char c, MinDFAState* state) {
+    for (auto it = this->trans.begin(); it != this->trans.end(); it++) {
+        if (get<0>(*it) == c) {
+            get<1>(*it) = state;
+            return;
+        }
+    }
+    this->trans.push_back({c, state});
+    sort(this->trans.begin(), this->trans.end());
+}
+
+// display the minial DFA state
+void MinDFAState::display() {
+    cout << this->id << ": ";
+
+    cout << "[";
+    for (auto it = this->trans.begin(); it != this->trans.end(); it++) {
+        cout << get<0>(*it) << " -> ";
+        cout << get<1>(*it)->id <<  ", ";
+    }
+    cout << "] | ";
+
+    cout << "{";
+    for (auto it = this->dfa_states.begin(); it != this->dfa_states.end(); it++) {
+        cout << (*it)->id << ", ";
+    }
+    cout << "}";
+}
+
+// construct a minial DFA
+MinDFA::MinDFA(DFA* dfa) {
+    // DFA2MinDFA
+
+    set<DFAState*> N, A; // Non-Accept States, Accept States
+    A = dfa->end;
+    for (auto s: dfa->full_list) {
+        if (!dfa->end.count(s)) {
+            N.insert(s);
+        }
+    }
+
+    deque<set<DFAState*>> state_sets;
+    state_sets.push_back(N);
+    state_sets.push_back(A);
+    while (!state_sets.empty()) {
+        auto states = state_sets.front(); state_sets.pop_front();
+
+        if (states.size() == 1) {
+            // only one element, cann't be splited
+            this->states.push_back(new MinDFAState(states));
+            continue;
+        }
+
+        // split states
+        bool is_split = false;
+        auto s0 = *states.begin();
+        for (auto it = states.begin(); it != states.end(); it++) {
+            if (*it == s0) continue;
+
+            if (!s0->transEqual(*it)) {
+                set<DFAState*> temp;
+                for (auto it2 = states.begin(); it2 != states.end(); it2++) {
+                    if ((*it)->transEqual(*it2)) {
+                        temp.insert(*it2);
+                    }
+                }
+                set<DFAState*> res;
+                set_difference(states.begin(), states.end(), temp.begin(), temp.end(), inserter(res, res.begin()));
+                state_sets.push_back(temp);
+                state_sets.push_back(res);
+
+                is_split = true;
+
+                break;
+            }
+        }
+
+        if (!is_split) this->states.push_back(new MinDFAState(states));
+    }
+
+    for (auto it = this->states.begin(); it != this->states.end(); it++) {
+        // start state
+        if ((*it)->dfa_states.count(dfa->start)) {
+            this->start = *it;
+        }
+
+        // end state
+        for (auto it2 = dfa->end.begin(); it2 != dfa->end.end(); it2++) {
+            if ((*it)->dfa_states.count(*it2)) {
+                this->end.insert(*it);
+            }
+        }
+
+        // state trans
+        auto s = *((*it)->dfa_states.begin());
+        for (auto it2 = s->trans.begin(); it2 != s->trans.end(); it2++) {
+            auto symbol = get<0>(*it2);
+            auto dest   = get<1>(*it2);
+
+            for (auto it3 = this->states.begin(); it3 != this->states.end(); it3++) {
+                if ((*it3)->dfa_states.count(dest)) {
+                    (*it)->addTrans(symbol, *it3);
+                }
+            }
+        }
+    }
+}
+
+// display the minial DFA
+void MinDFA::display() {
+    cout << "start: " << this->start->id << endl;
+    cout << "end:   {";
+    for (auto state: this->end) {
+        cout << state->id << ", ";
+    }
+    cout << "}" << endl;
+
+    for (auto it = this->states.begin(); it != this->states.end(); it++) {
         (*it)->display();
         cout << endl;
     }

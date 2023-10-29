@@ -77,6 +77,9 @@ int main(int argc, char *argv[])
     auto dfa = new DFA(nfa);
     dfa->display();
 
+    cout << "\nMinial DFA\n";
+    auto min_dfa = new MinDFA(dfa);
+    min_dfa->display();
 
     return 0;
 }

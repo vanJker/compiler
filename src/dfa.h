@@ -16,6 +16,7 @@ public:
     DFAState* epsilon_closure();
     DFAState* delta(char c);
     bool containsNFAState(NFAState* state);
+    bool transEqual(DFAState* state);
     void display();
 };
 
@@ -31,6 +32,27 @@ public:
 private:
     bool inFullList(DFAState* state);
     DFAState* convert(DFAState* state);
+};
+
+class MinDFAState {
+public:
+    int id;
+    set<DFAState*> dfa_states;
+    vector<tuple<char, MinDFAState*>> trans;
+
+    MinDFAState(set<DFAState*> s);
+    void addTrans(char c, MinDFAState* state);
+    void display();
+};
+
+class MinDFA {
+public:
+    MinDFAState* start;
+    set<MinDFAState*> end;
+    vector<MinDFAState*> states;
+
+    MinDFA(DFA* dfa);
+    void display();
 };
 
 #endif // DFA_H
