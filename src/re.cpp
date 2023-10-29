@@ -1,4 +1,5 @@
 #include "re.h"
+#include <algorithm>
 
 // operator priority
 int operatorPriority(char c) {
@@ -17,6 +18,9 @@ bool isOperator(char c) {
 
 // add concat operator as '&, and () to contain RE
 RegEp addConcat(RegEp re) {
+    if (*(re.end()-1) == '\n') re.pop_back();
+    replace(re.begin(), re.end(), '\n', '|');
+
     RegEp res;
     res = "(";
     char pre; // previous char

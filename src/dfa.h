@@ -49,6 +49,7 @@ class MinDFA {
 public:
     MinDFAState* start;
     set<MinDFAState*> end;
+    MinDFAState* error;
     vector<MinDFAState*> states;
 
     MinDFA(DFA* dfa);

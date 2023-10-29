@@ -25,6 +25,8 @@ set(PROJECT_SOURCES
         src/re.h
         src/dfa.cpp
         src/dfa.h
+        src/codegen.cpp
+        src/codegen.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

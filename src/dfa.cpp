@@ -229,7 +229,7 @@ MinDFA::MinDFA(DFA* dfa) {
             this->start = *it;
         }
 
-        // end state
+        // end states
         for (auto it2 = dfa->end.begin(); it2 != dfa->end.end(); it2++) {
             if ((*it)->dfa_states.count(*it2)) {
                 this->end.insert(*it);
@@ -249,6 +249,21 @@ MinDFA::MinDFA(DFA* dfa) {
             }
         }
     }
+
+    // error states
+    for (auto it = this->states.begin(); it != this->states.end(); it++) {
+        auto s = *it;
+        bool is_error = true;
+        for (auto it2 = s->trans.begin(); it2 != s->trans.end(); it2++) {
+            if (get<1>(*it2) != s) {
+                is_error = false;
+            }
+        }
+        if (is_error && !this->end.count(s)) {
+            this->error = s;
+            break;
+        }
+    }
 }
 
 // display the minial DFA
@@ -259,6 +274,7 @@ void MinDFA::display() {
         cout << state->id << ", ";
     }
     cout << "}" << endl;
+    cout << "error: " << this->error->id << endl;
 
     for (auto it = this->states.begin(); it != this->states.end(); it++) {
         (*it)->display();

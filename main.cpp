@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "src/nfa.h"
 #include "src/dfa.h"
+#include "src/codegen.h"
 
 #include <QApplication>
 
@@ -80,6 +81,10 @@ int main(int argc, char *argv[])
     cout << "\nMinial DFA\n";
     auto min_dfa = new MinDFA(dfa);
     min_dfa->display();
+
+    cout << "\nCode Gen\n";
+    auto program = codeGen(min_dfa);
+    cout << program << endl;
 
     return 0;
 }
